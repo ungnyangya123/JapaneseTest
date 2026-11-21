@@ -716,8 +716,9 @@ const MODE_NAME={...TQ,tquiz:'본문 퀴즈',card:'카드',mean:'뜻 고르기',
 
 // ───────── 저장 ─────────
 const KEY='jp-kaiwa-vocab-v1';
-let S={known:{},wrong:{},miss:{},star:{},twrong:{},prefs:{set:'j1',theme:'system',len:10,hard:false,speak:false,auto:true,strict:3,ink:'auto',ta:false,taSec:10,confirm:true,order:'seq',trans:false}};
+let S={known:{},wrong:{},miss:{},star:{},twrong:{},prefs:{set:'j1',theme:'system',len:10,hard:false,speak:false,auto:false,strict:3,ink:'auto',ta:false,taSec:10,confirm:true,order:'seq',trans:false}};
 try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);S.known=o.known||{};S.wrong=o.wrong||{};S.miss=o.miss||{};S.star=o.star||{};S.twrong=o.twrong||{};Object.assign(S.prefs,o.prefs||{});}}catch(e){}
+if(!S.prefs.v2){S.prefs.auto=false;S.prefs.v2=1}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 // ───────── 상태 ─────────
@@ -1012,8 +1013,9 @@ function renderQuiz(){
   }
   const left=q.tl?Math.max(0,q.tl-(performance.now()-q.ts)/1000):0;
   const timerH=q.tl&&!q.answered?`<div class="tmr${left<3?' low':''}"><div class="tbar"><i id="tbar" style="width:${left/q.tl*100}%"></i></div><span id="tnum">${left.toFixed(1)}초</span></div>`:'';
+  const quick=`<div class="txtop">${isWrite(q)?`<button class="chip" data-act="tAuto" aria-pressed="${S.prefs.auto}">자동 채점 ${S.prefs.auto?'켬':'끔'}</button>`:''}<button class="chip" data-act="tTa" aria-pressed="${S.prefs.ta}">타임어택 ${S.prefs.ta?'켬 · '+S.prefs.taSec+'초':'끔'}</button></div>`;
   st.innerHTML=`<div class="qtop"><span>${Q.i+1} / ${n}</span><span>맞힘 ${Q.score}</span></div>
-    <div class="progress"><i style="width:${Q.i/n*100}%"></i></div>
+    <div class="progress"><i style="width:${Q.i/n*100}%"></i></div>${quick}
     ${timerH}<div class="panel prompt">${promptHTML(q)}</div>${body}`;
   if(isWrite(q)){if(q.kb){if(!q.answered){const inp=$('typeIn');inp.focus();inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();checkType()}})}}else bindPad(q)}
   if(S.prefs.speak&&!q.answered&&q.type==='mean')say(q.it.say);
@@ -1303,6 +1305,10 @@ document.addEventListener('click',e=>{
     case 'ccStar':{const id=card.order[card.i];S.star[id]?delete S.star[id]:S.star[id]=true;save();renderCard(false);break}
     case 'ccKnown':markKnown(!card.known.has(card.order[card.i]));if(!card.known.has(card.order[card.i])&&card.open)setOpen(false);break;
     case 'tq':startTQ(d.type);break;
+    case 'tAuto':S.prefs.auto=!S.prefs.auto;save();clearTimeout(padTimer);
+      if(S.prefs.auto&&Q.cur&&isWrite(Q.cur)&&!Q.cur.answered&&Q.cur.strokes&&Q.cur.strokes.length)padTimer=setTimeout(gradeInk,1600);
+      renderQuiz();break;
+    case 'tTa':S.prefs.ta=!S.prefs.ta;save();if(Q.cur&&!Q.cur.answered){if(S.prefs.ta)startTimer(Q.cur);else{stopTimer();Q.cur.tl=0}}renderQuiz();break;
     case 'tw':UI.tw=!UI.tw;renderTQ();break;
     case 'sentCheck':sentCheck();break;
     case 'sentUndo':Q.cur.placed.pop();renderQuiz();break;
