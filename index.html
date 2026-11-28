@@ -201,6 +201,17 @@ input[type=text]{width:100%;font:inherit;font-family:var(--font-word);font-size:
 .tok.put{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .tok[disabled]{cursor:default}
 .settings .panel{max-height:calc(100vh - 40px);overflow-y:auto}
+.gsec{display:flex;flex-direction:column;gap:10px}
+.gsec h3{margin:0;font-size:18px;line-height:1.4}
+.gsec p{margin:0;line-height:1.7}
+.gj{font-family:var(--font-word);font-weight:500}
+.gul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;line-height:1.7}
+.gscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px}
+.gtab{width:100%;border-collapse:collapse;font-size:14px;line-height:1.6}
+.gtab th{text-align:left;font-size:12px;color:var(--muted);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.gtab td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.gtab td:first-child{white-space:nowrap}
+.gtab.wide{min-width:660px}.gtab.wide td{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -239,7 +250,7 @@ input[type=text]{width:100%;font:inherit;font-family:var(--font-word);font-size:
     <div class="set-row"><p>타임어택<small>제한 시간이 지나면 오답 처리됩니다</small></p><div class="seg" id="segTa"></div></div>
     <div class="set-row"><p>문제당 제한 시간<small>손글씨는 4글자를 넘으면 글자당 +1.5초</small></p><div class="seg" id="segTaSec"></div></div>
     <div class="set-row"><p>손글씨 색<small>자동: 테마 배경과 가장 대비되는 색</small></p><div class="seg" id="segInk"></div></div>
-    <div class="set-row"><p>기록 초기화<small>현재 단원의 아는 카드·별표·오답 노트·틀린 문장</small></p><button class="btn bad" id="resetBtn">초기화</button></div>
+    <div class="set-row"><p>기록 초기화<small>현재 단원의 아는 카드·별표·오답 노트·틀린 문장·틀린 문법</small></p><button class="btn bad" id="resetBtn">초기화</button></div>
     <p class="fb no" id="resetMsg" hidden></p>
   </div>
 </div>
@@ -631,6 +642,202 @@ const T3=[
  ['せんせい','おちゃかいは はじめての ひとでも たのしめますよ。','차 모임은 처음인 사람이라도 즐길 수 있어요.'],
  ['せんせい','いっしょに どうぞ。','함께 하세요.']]}];
 
+// ───────── 문법 (학습지·교과서 기준) ─────────
+const tb=(h,rows)=>`<div class="gscroll"><table class="gtab"><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const ul=a=>`<ul class="gul">${a.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+const jp=s=>`<span lang="ja" class="gj">${s}</span>`;
+
+const GN={
+j1:[
+ {src:'학습지',h:'여러 가지 조사',b:tb(['조사','뜻','예문'],[
+  [jp('～が'),'~이/가',jp('花が あります。')+'<br>꽃이 있습니다.'],
+  [jp('～か'),'~까?',jp('しゅみは 何ですか。')+'<br>취미는 무엇입니까?'],
+  [jp('～は'),'~은/는',jp('わたしは こうこうせいです。')+'<br>저는 고등학생입니다.'],
+  [jp('～へ'),'~에게, ~로',jp('なつやすみ、日本へ いきます。')+'<br>여름방학(에) 일본에 갑니다.'],
+  [jp('～の'),'~의',jp('こちらは 田中さんの お母さんです。')+'<br>이분은 다나카 씨의 어머니입니다.'],
+  [jp('～も'),'~도',jp('わたしも これが いいです。')+'<br>저도 이것이 좋습니다.'],
+  [jp('～を'),'~을/를',jp('ラーメンを たべます。')+'<br>라면을 먹습니다.'],
+  [jp('～と'),'~와/과',jp('パンと ぎゅうにゅうを かいます。')+'<br>빵과 우유를 삽니다.'],
+  [jp('～に'),'~에, ~에게',jp('ここに ねこが います。')+'<br>여기에 고양이가 있습니다.<br>'+jp('ともだちに はなします。')+'<br>친구에게 이야기합니다.'],
+  [jp('～で'),'~에서, ~로',jp('デパートで かいものを します。')+'<br>백화점에서 쇼핑을 합니다.<br>'+jp('でんしゃで いきます。')+'<br>전차로 갑니다.']])},
+ {src:'학습지·교과서',h:jp('～が すきです')+' (~을/를 좋아합니다)',b:`<p>대상을 나타내는 조사는 주로 ${jp('を')}지만, 아래 경우에는 ${jp('が')}를 써요.</p>`+ul([
+  '감정의 대상: '+jp('すきだ、きらいだ、いやだ'),
+  '능력의 대상: '+jp('わかる、できる、じょうずだ、へただ'),
+  '욕구의 대상: '+jp('ほしい、～たい')])+`<p>${jp('どんな うたが すき？')} 어떤 노래를 좋아해?<br>${jp('にほんの アニメソングが すき。')} 일본 애니메이션 노래를 좋아해.</p>`},
+ {src:'학습지·교과서',h:jp('～ために')+' (~하기 위해)',b:`<p>목적을 나타내요.</p>`+tb(['품사','접속 방법','예문'],[
+  ['동사','사전형 + '+jp('ために'),jp('大学に 入るために、勉強して います。')+'<br>대학에 들어가기 위해 공부하고 있습니다.'],
+  ['명사','명사 + '+jp('の')+' + '+jp('ために'),jp('面接の ために、くろい スーツを 買った。')+'<br>면접을 위해 검은 정장을 샀다.']])+`<p>${jp('じょうずに うたう ために、れんしゅうして いるよ。')} 잘 부르기 위해 연습하고 있어.</p>`},
+ {src:'교과서',h:'기본 표현',b:ul([
+  '타인 소개: '+jp('この こは、ともだちの ユジンちゃん。')+' 얘는 친구 유진이야.',
+  '자기소개: '+jp('はじめまして。パク・ユジンです。どうぞ よろしく おねがいします。'),
+  '대답: '+jp('こちらこそ、どうぞ よろしく！')+' 저야말로 잘 부탁해!',
+  '취미·관심: '+jp('しゅみは なに？')+' / '+jp('どんな うたが すき？')])},
+ {src:'교과서',h:'플러스 표현',b:ul([
+  jp('～よ')+' (~야): '+jp('ユジンちゃんも りゅうがくせいだよ。'),
+  jp('～かな')+' (~일까?, ~이려나?): '+jp('にほんの うたを きく ことかな。'),
+  jp('～とか')+' (~라든가): '+jp('アニメソングとか、ロックとか……。'),
+  jp('～て いる')+' (~하고 있다): '+jp('れんしゅうして いるよ。'),
+  jp('～て ください')+' (~해 주세요): '+jp('おうえんして ください！')])},
+ {src:'교과서',h:'인사 표현',b:tb(['일본어','뜻'],[
+  [jp('おひさしぶりです / ひさしぶり'),'오랜만입니다 / 오랜만 (친한 사이)'],
+  [jp('おげんきですか'),'잘 지내십니까?'],
+  [jp('はい、おかげさまで'),'네, 덕분에요'],
+  [jp('そうなんですか / そうなんだ'),'그래요? / 그렇구나']])}],
+j2:[
+ {src:'학습지·교과서',h:'기본 표현',b:ul([
+  '조언·제안: '+jp('おはなみは どう？')+' 꽃구경은 어때?',
+  '유감: '+jp('ざんねんだね。')+' 아쉽네.',
+  '확인: '+jp('やくそくは １２じだよね。')+' 약속은 12시 맞지?',
+  '시간·때: '+jp('えきまで どのくらい かかる？')+' 역까지 어느 정도 걸려?'])},
+ {src:'교과서',h:jp('～ね')+' (~네, ~죠?)',b:`<p>동의할 때, 동의를 구할 때, 확인할 때 써요.</p>`+ul([
+  jp('かわいいですね。')+' 귀엽네요, 그렇죠?',
+  jp('テストは あしたですね。')+' 시험은 내일이죠? — '+jp('はい、そうです。')])},
+ {src:'교과서',h:jp('～なあ')+' (정말 ~하구나)',b:`<p>자기 감정을 드러내거나 혼잣말할 때 문장 끝에 붙여요.</p>`+ul([jp('かわいいなあ。')+' 참 귀엽구나.',jp('あついなあ。')+' 정말 덥네.',jp('ジホくん、おそいなあ。')+' (본문)'])},
+ {src:'교과서',h:jp('～でしょう')+' (~겠지요, ~겠습니다)',b:`<p>예보처럼 추측해서 말할 때 써요.</p>`+ul([jp('らいしゅうは はれるでしょう。')+' 다음 주는 맑겠습니다.',jp('とうきょうにも さくらが さくでしょう。')+' 도쿄에도 벚꽃이 피겠지요.'])},
+ {src:'교과서',h:jp('かかる')+' (걸리다)',b:tb(['표현','뜻'],[[jp('じかんが かかる'),'시간이 걸리다'],[jp('びょうきに かかる'),'병에 걸리다'],[jp('でんわが かかる'),'전화가 걸려 오다']])},
+ {src:'교과서',h:jp('くらい・ぐらい')+' (정도)',b:`<p>예전에는 붙는 말에 따라 구분했지만, 지금은 둘 다 구분 없이 써요. ${jp('１０ぷんぐらいかな。')} 10분 정도려나.</p>`},
+ {src:'학습지',h:'시간을 나타내는 말',b:tb(['지난','이번','다음'],[
+  [jp('きのう')+' 어제',jp('きょう')+' 오늘',jp('あした')+' 내일'],
+  [jp('せんしゅう')+' 지난주',jp('こんしゅう')+' 이번 주',jp('らいしゅう')+' 다음 주'],
+  [jp('せんげつ')+' 지난달',jp('こんげつ')+' 이번 달',jp('らいげつ')+' 다음 달'],
+  [jp('きょねん・さくねん')+' 작년',jp('ことし')+' 올해',jp('らいねん')+' 내년']])},
+ {src:'교과서',h:'대답 표현',b:tb(['일본어','뜻'],[
+  [jp('わかりました'),'알겠습니다 (윗사람에게)'],[jp('うん、わかった'),'알았어 (친구에게)'],[jp('りょうかい'),'알았음 (친한 사이)']])}],
+j3:[
+ {src:'교과서',h:'기본 표현',b:ul([
+  '방문: '+jp('おじゃまします。')+' / '+jp('いらっしゃい。')+' / '+jp('どうぞ、あがって ください。'),
+  '권유: '+jp('おちゃ どうぞ。')+' / '+jp('なっとうは どう？'),
+  '가능: '+jp('さしみは たべられますか。')+' 생선회는 먹을 수 있어요?',
+  '거절: '+jp('すみませんが、ぼくは ちょっと……。')+' / '+jp('なっとうは すこし にがてです。')])},
+ {src:'학습지·교과서',h:'동사의 가능형 (~할 수 있다)',b:tb(['구분','활용 방법','예'],[
+  ['1그룹','어미 う단 → え단 + '+jp('る'),jp('よむ → よめる')+'<br>'+jp('のる → のれる')],
+  ['2그룹',''+jp('る')+'를 떼고 '+jp('られる'),jp('たべる → たべられる')+'<br>'+jp('みる → みられる')],
+  ['3그룹','불규칙',jp('する → できる')+'<br>'+jp('くる → こられる')]])+`<p><b>${jp('ら抜き言葉')}</b>: ${jp('たべられる')}의 ${jp('ら')}를 빼고 ${jp('たべれる')}처럼 쓰는 현상이에요.</p>`},
+ {src:'학습지',h:jp('はい')+' (여기요, 자)',b:`<p>대답·긍정 외에 무언가를 권할 때도 써요. ${jp('はい、おちゃ どうぞ。')}</p>`},
+ {src:'학습지',h:jp('いいえ')+' (아니에요)',b:`<p>부정 외에 '천만에요'라는 뜻으로도 써요. ${jp('いいえ。また きてね。')}</p>`},
+ {src:'학습지',h:jp('にがてだ')+' (서투르다, 잘 못하다)',b:`<p>다루기 어렵거나 싫은 상대, 잘 못하는 일을 나타내요. 일본인은 ${jp('きらいだ')}(싫어하다)라고 직접 말하기보다 ${jp('とくいだ')}(자신 있다)의 반대인 ${jp('にがてだ')}로 돌려 말하는 경향이 있어요.</p>`},
+ {src:'학습지',h:'‘준비’를 뜻하는 말',b:tb(['단어','쓰임'],[
+  [jp('準備(じゅんび)'),'물건은 물론 계획·순서까지 포함하는 넓은 의미. 시간과 노력이 많이 드는 일'],
+  [jp('用意(ようい)'),'필요한 물건 등 구체적인 물품을 갖추는 짧은 준비'],
+  [jp('支度(したく)'),'외출·식사 준비 등 짧은 시간의 개인적인 준비']])}]};
+
+const GQD={
+j1:[
+ ['조사','花＿ あります。','꽃이 있습니다.','が',['を','で','へ'],'~이/가 = が','はなが あります。'],
+ ['조사','しゅみは 何です＿。','취미는 무엇입니까?','か',['ね','よ','の'],'의문 ~까? = か','しゅみは なんですか。'],
+ ['조사','わたし＿ こうこうせいです。','저는 고등학생입니다.','は',['を','へ','で'],'~은/는 = は (읽을 때는 「わ」)','わたしは こうこうせいです。'],
+ ['조사','なつやすみ、日本＿ いきます。','여름방학(에) 일본에 갑니다. (방향)','へ',['を','が','と'],'방향 ~로 = へ (읽을 때는 「え」). に도 쓸 수 있어요.','なつやすみ、にほんへ いきます。'],
+ ['조사','田中さん＿ お母さんです。','다나카 씨의 어머니입니다.','の',['も','を','で'],'~의 = の','たなかさんの おかあさんです。'],
+ ['조사','わたし＿ これが いいです。','저도 이것이 좋습니다.','も',['を','へ','に'],'~도 = も','わたしも これが いいです。'],
+ ['조사','ラーメン＿ たべます。','라면을 먹습니다.','を',['が','で','へ'],'~을/를 = を (읽을 때는 「お」)','ラーメンを たべます。'],
+ ['조사','パン＿ ぎゅうにゅうを かいます。','빵과 우유를 삽니다.','と',['の','で','に'],'~와/과 = と','パンと ぎゅうにゅうを かいます。'],
+ ['조사','ともだち＿ はなします。','친구에게 이야기합니다.','に',['で','を','が'],'~에, ~에게 = に','ともだちに はなします。'],
+ ['조사','でんしゃ＿ いきます。','전차로 갑니다. (수단)','で',['を','が','の'],'수단 ~로 = で','でんしゃで いきます。'],
+ ['조사','デパート＿ かいものを します。','백화점에서 쇼핑을 합니다.','で',['を','が','の'],'동작하는 장소 ~에서 = で','デパートで かいものを します。'],
+ ['～が すきです','どんな うた＿ すき？','어떤 노래를 좋아해?','が',['で','に','へ'],'すきだ의 대상에는 を가 아니라 が를 써요.','どんな うたが すき？'],
+ ['～が すきです','わたしは ピアノ＿ じょうずです。','저는 피아노를 잘 칩니다.','が',['を','で','へ'],'능력의 대상(じょうずだ)에도 が를 써요.','わたしは ピアノが じょうずです。'],
+ ['～ために','じょうずに うたう＿、れんしゅうして いるよ。','잘 부르기 위해 연습하고 있어.','ために',['とか','かな','まで'],'목적 ~하기 위해 = ために (동사 사전형 + ために)','じょうずに うたう ために、れんしゅうして いるよ。'],
+ ['～ために','めんせつ＿ ために、くろい スーツを かった。','면접을 위해 검은 정장을 샀다.','の',['が','を','に'],'명사 + の + ために','めんせつの ために、くろい スーツを かった。'],
+ ['～ために','だいがくに はいる＿、べんきょうして います。','대학에 들어가기 위해 공부하고 있습니다.','ために',['のために','ためを','ためが'],'동사는 사전형에 바로 ために. の는 명사 뒤에만 붙어요.','だいがくに はいる ために、べんきょうして います。'],
+ ['플러스 표현','ユジンちゃんも りゅうがくせいだ＿。','유진이도 유학생이야.','よ',['か','を','へ'],'문장 끝 よ: 상대에게 알려 줄 때 (~야)','ユジンちゃんも りゅうがくせいだよ。'],
+ ['플러스 표현','にほんの うたを きく こと＿。','일본 노래를 듣는 거려나.','かな',['とか','から','まで'],'~かな: ~일까?, ~이려나?','にほんの うたを きく ことかな。'],
+ ['플러스 표현','にほんの アニメソング＿、ロック＿……。','일본 애니 노래라든가, 록이라든가….','とか',['かな','から','まで'],'예를 들 때 ~라든가 = とか','にほんの アニメソングとか、ロックとか。'],
+ ['플러스 표현','れんしゅうして ＿よ。','연습하고 있어.','いる',['ある','する','くる'],'~て いる: ~하고 있다','れんしゅうして いるよ。'],
+ ['플러스 표현','みなさん おうえんして ＿！','여러분, 응원해 주세요!','ください',['います','あります','でした'],'~て ください: ~해 주세요','みなさん おうえんして ください！'],
+ ['인사','「こちらこそ」의 뜻은?','','저야말로',['처음 뵙겠습니다','잘 부탁합니다','안녕'],'','こちらこそ'],
+ ['인사','「おひさしぶりです」의 뜻은?','','오랜만입니다',['처음 뵙겠습니다','덕분에요','잘 지내십니까?'],'친한 사이에서는 ひさしぶり','おひさしぶりです'],
+ ['인사','「おかげさまで」의 뜻은?','','덕분에요',['오랜만입니다','그렇구나','저야말로'],'おげんきですか → はい、おかげさまで','おかげさまで']],
+j2:[
+ ['기본 표현','おはなみは ＿？','꽃구경은 어때? (제안)','どう',['どこ','なに','だれ'],'~は どう？: ~은 어때? 정중하게는 どうですか','おはなみは どう？'],
+ ['기본 표현','どようびは むり。― そう。＿だね。','토요일은 안 돼. ― 그래. 아쉽네.','ざんねん',['きれい','すごい','りょうかい'],'유감: ざんねんだね (아쉽네)','そう。ざんねんだね。'],
+ ['～よね','やくそくは １２じだ＿。','약속은 12시 맞지? (확인)','よね',['なあ','かな','とか'],'확인할 때 ~だよね','やくそくは じゅうにじだよね。'],
+ ['～ね','テストは あしたです＿。','시험은 내일이죠? (확인)','ね',['なあ','を','が'],'~ね: 동의를 구하거나 확인할 때','テストは あしたですね。'],
+ ['～なあ','ジホくん、おそい＿。','지호 군 늦네…. (혼잣말)','なあ',['か','を','が'],'~なあ: 감정을 혼잣말로 드러낼 때','ジホくん、おそいなあ。'],
+ ['～なあ','あつい＿。','정말 덥네. (혼잣말)','なあ',['か','を','で'],'','あついなあ。'],
+ ['～でしょう','らいしゅうは はれる＿。','다음 주는 맑겠습니다. (예보)','でしょう',['ました','ません','でした'],'~でしょう: 추측 (~겠습니다)','らいしゅうは はれるでしょう。'],
+ ['～でしょう','とうきょうにも さくらが さく＿。','도쿄에도 벚꽃이 피겠지요.','でしょう',['ました','ません','たい'],'','とうきょうにも さくらが さくでしょう。'],
+ ['かかる','えきまで どのくらい ＿？','역까지 얼마나 걸려?','かかる',['ある','いる','する'],'じかんが かかる: 시간이 걸리다','えきまで どのくらい かかる？'],
+ ['かかる','「びょうきに かかる」의 뜻은?','','병에 걸리다',['시간이 걸리다','전화가 걸려 오다','열쇠를 걸다'],'','びょうきに かかる'],
+ ['かかる','「でんわが かかる」의 뜻은?','','전화가 걸려 오다',['병에 걸리다','시간이 걸리다','전화를 끊다'],'','でんわが かかる'],
+ ['くらい・ぐらい','１０ぷん＿かな。','10분 정도려나.','ぐらい',['まで','から','より'],'정도 = くらい/ぐらい (둘 다 써요)','じゅっぷんぐらいかな。'],
+ ['～まで','えき＿ どのくらい かかる？','역까지 얼마나 걸려?','まで',['から','ぐらい','より'],'~까지 = まで','えきまで どのくらい かかる？'],
+ ['시간 표현','‘지난주’는?','','せんしゅう',['こんしゅう','らいしゅう','まいしゅう'],'せんしゅう · こんしゅう · らいしゅう','せんしゅう'],
+ ['시간 표현','‘이번 주’는?','','こんしゅう',['せんしゅう','らいしゅう','こんげつ'],'','こんしゅう'],
+ ['시간 표현','‘다음 달’은?','','らいげつ',['せんげつ','こんげつ','らいねん'],'せんげつ · こんげつ · らいげつ','らいげつ'],
+ ['시간 표현','‘작년’은?','','きょねん',['らいねん','ことし','きのう'],'きょねん(さくねん) · ことし · らいねん','きょねん'],
+ ['시간 표현','‘어제’는?','','きのう',['きょう','あした','ことし'],'きのう · きょう · あした','きのう'],
+ ['대답 표현','선생님께 "알겠습니다"라고 할 때는?','','わかりました',['りょうかい','うん、わかった','ごめん'],'윗사람: わかりました / 친구: うん、わかった・りょうかい','わかりました'],
+ ['대답 표현','「りょうかい」의 뜻은?','','알았음',['미안해','천천히','다행이다'],'친한 사이에서 쓰는 말','りょうかい']],
+j3:[
+ ['가능형','よむ(읽다)의 가능형은?','','よめる',['よまれる','よむれる','よみられる'],'1그룹: う단 → え단 + る (む → め)','よめる'],
+ ['가능형','のる(타다)의 가능형은?','','のれる',['のられる','のりれる','のらる'],'1그룹: る → れ + る','のれる'],
+ ['가능형','たべる(먹다)의 가능형은?','','たべられる',['たべえる','たべさせる','たべらる'],'2그룹: る를 떼고 られる','たべられる'],
+ ['가능형','みる(보다)의 가능형은?','','みられる',['みえる','みせる','みらる'],'2그룹: る를 떼고 られる (みえる는 ‘보이다’)','みられる'],
+ ['가능형','する(하다)의 가능형은?','','できる',['される','しれる','すれる'],'3그룹 불규칙: する → できる','できる'],
+ ['가능형','くる(오다)의 가능형은?','','こられる',['くられる','くれる','きられる'],'3그룹 불규칙: くる → こられる','こられる'],
+ ['가능형','さしみは たべ＿ますか。','생선회는 먹을 수 있어요?','られ',['させ','たく','ませ'],'たべる → たべられる → たべられます','さしみは たべられますか。'],
+ ['가능형','かんじが ＿ます。','한자를 읽을 수 있어요.','よめ',['よみ','よま','よん'],'よむ → よめる → よめます','かんじが よめます。'],
+ ['가능형','じてんしゃに ＿ます。','자전거를 탈 수 있어요.','のれ',['のり','のら','のっ'],'のる → のれる → のれます','じてんしゃに のれます。'],
+ ['ら抜き言葉','たべられる에서 ら를 뺀 ら抜き言葉는?','','たべれる',['たべる','たべらる','たべせる'],'구어에서 ら를 빼고 たべれる처럼 쓰는 현상','たべれる'],
+ ['はい','「はい、おちゃ どうぞ。」의 はい는?','','여기요, 자',['네','아니요','천만에요'],'はい는 무언가를 권할 때도 써요.','はい、おちゃ どうぞ。'],
+ ['いいえ','감사 인사에 대한 「いいえ。また きてね。」의 いいえ는?','','천만에요',['아니요','네','여기요'],'いいえ는 ‘천만에요’의 뜻으로도 써요.','いいえ。また きてね。'],
+ ['にがてだ','なっとうは すこし ＿です。','낫토는 조금 잘 못 먹어요.','にがて',['とくい','じょうず','あまい'],'にがてだ: 서투르다, 잘 못하다','なっとうは すこし にがてです。'],
+ ['にがてだ','にがてだ(서투르다)와 반대되는 말은?','','とくいだ',['きらいだ','すきだ','へただ'],'とくいだ(자신 있다, 특기다) ↔ にがてだ','とくいだ'],
+ ['준비','구체적인 물건을 갖추는 짧은 준비는?','','ようい(用意)',['じゅんび(準備)','したく(支度)','おもてなし'],'',''],
+ ['준비','외출·식사 같은 개인적인 짧은 준비는?','','したく(支度)',['じゅんび(準備)','ようい(用意)','おみやげ'],'',''],
+ ['준비','계획·순서까지 포함하는 넓은 의미의 준비는?','','じゅんび(準備)',['したく(支度)','ようい(用意)','おみやげ'],'',''],
+ ['방문 표현','남의 집에 들어갈 때 하는 말은?','','おじゃまします',['いらっしゃい','いただきます','ただいま'],'나올 때는 おじゃましました','おじゃまします'],
+ ['방문 표현','손님을 맞이할 때 하는 말은?','','いらっしゃい',['おじゃまします','いただきます','おかえり'],'','いらっしゃい'],
+ ['거절','すみませんが、ぼくは ＿……。','죄송하지만, 저는 좀…. (완곡한 거절)','ちょっと',['とても','もう','また'],'ちょっと……: 말끝을 흐려 완곡하게 거절','すみませんが、ぼくは ちょっと。']]};
+
+// 동사 활용 (학습지): [기본형, 뜻, 종류, ます형 어간, て형, た형, ない형, 가능형]
+const VERBS=[
+ ['あう','만나다','1류','あい','あって','あった','あわない','あえる'],
+ ['いく','가다','1류','いき','いって','いった','いかない','いける'],
+ ['かく','쓰다','1류','かき','かいて','かいた','かかない','かける'],
+ ['およぐ','헤엄치다','1류','およぎ','およいで','およいだ','およがない','およげる'],
+ ['まつ','기다리다','1류','まち','まって','まった','またない','まてる'],
+ ['かえる','돌아가다','1류','かえり','かえって','かえった','かえらない','かえれる'],
+ ['はなす','이야기하다','1류','はなし','はなして','はなした','はなさない','はなせる'],
+ ['よむ','읽다','1류','よみ','よんで','よんだ','よまない','よめる'],
+ ['あそぶ','놀다','1류','あそび','あそんで','あそんだ','あそばない','あそべる'],
+ ['のる','타다','1류','のり','のって','のった','のらない','のれる'],
+ ['みる','보다','2류','み','みて','みた','みない','みられる'],
+ ['たべる','먹다','2류','たべ','たべて','たべた','たべない','たべられる'],
+ ['おきる','일어나다','2류','おき','おきて','おきた','おきない','おきられる'],
+ ['する','하다','3류','し','して','した','しない','できる'],
+ ['くる','오다','3류','き','きて','きた','こない','こられる']];
+const VFORMS=[['masu','ます (~합니다)'],['mashita','ました (~했습니다)'],['masen','ません (~하지 않습니다)'],['te','て형 (~하고, ~해서)'],['ta','た형 (~했다)'],['tai','たい (~하고 싶다)'],['nai','ない (~하지 않다)'],['pot','가능형 (~할 수 있다)']];
+const VRULE={
+ '1류':{masu:'어미 う단 → い단 + ます',mashita:'어미 う단 → い단 + ました',masen:'어미 う단 → い단 + ません',te:'く→いて · ぐ→いで · う・つ・る→って · ぬ・ぶ・む→んで · す→して (예외 いく→いって)',ta:'て형과 같은 규칙, て→た · で→だ',tai:'어미 う단 → い단 + たい',nai:'어미 う단 → あ단 + ない (う로 끝나면 わ + ない)',pot:'어미 う단 → え단 + る'},
+ '2류':{masu:'る를 떼고 + ます',mashita:'る를 떼고 + ました',masen:'る를 떼고 + ません',te:'る를 떼고 + て',ta:'る를 떼고 + た',tai:'る를 떼고 + たい',nai:'る를 떼고 + ない',pot:'る를 떼고 + られる'},
+ '3류':{masu:'불규칙: する→します · くる→きます',mashita:'불규칙: しました · きました',masen:'불규칙: しません · きません',te:'불규칙: して · きて',ta:'불규칙: した · きた',tai:'불규칙: したい · きたい',nai:'불규칙: しない · こない',pot:'불규칙: できる · こられる'}};
+const gshuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+function vForms(v){const[d,,,st,te,ta,nai,pot]=v;return{masu:st+'ます',mashita:st+'ました',masen:st+'ません',te,ta,tai:st+'たい',nai,pot}}
+function vMistakes(v,f){
+  const[d,,k,st]=v,root=d.slice(0,-1);
+  const m={masu:[d+'ます',root+'ます'],mashita:[d+'ました',st+'ます'],masen:[d+'ません',st+'ない'],
+    te:[st+'て',d+'て',root+'いて',root+'って',root+'んで'],ta:[st+'た',d+'た',root+'いた',root+'った',root+'んだ'],
+    tai:[d+'たい',root+'たい'],nai:[st+'ない',d+'ない',root+'えない'],pot:[d+'られる',st+'れる',d+'れる']}[f];
+  if(k!=='1류')m.push(...{masu:[],te:['して','きて'],nai:['くない','すない'],pot:['される','きられる','くられる']}[f]||[]);
+  return m;
+}
+function buildGram(){
+  const out={};
+  for(const k of Object.keys(GQD))out[k]=GQD[k].map((r,i)=>({id:'g:'+k+':'+i,gram:true,cat:r[0],prompt:r[1],hint:r[2],w:r[3],opts:[r[3],...r[4]],ex:r[5],say:r[6]||'',m:r[1]}));
+  out.verb=[];
+  for(const v of VERBS){const F=vForms(v);
+    for(const[f,name]of VFORMS){
+      const right=F[f],seen=new Set([right]),pick=[];
+      for(const c of gshuf(vMistakes(v,f)))if(c&&!seen.has(c)&&pick.length<2){seen.add(c);pick.push(c)}
+      for(const c of gshuf(Object.values(F)))if(!seen.has(c)&&pick.length<3){seen.add(c);pick.push(c)}
+      out.verb.push({id:'g:v:'+v[0]+':'+f,gram:true,cat:'동사 활용 · '+v[2],prompt:`「${v[0]}」(${v[1]})의 ${name}`,hint:'',w:right,opts:[right,...pick],ex:v[2]+' 동사: '+VRULE[v[2]][f],say:right,m:`${v[0]} → ${name}`});
+    }}
+  return out;
+}
+const GRAM=buildGram();
+const VTABLE=tb(['기본형','뜻','종류','ます','て형','た형','たい','ない','가능형'],VERBS.map(v=>{const F=vForms(v);return[jp(v[0]),v[1],v[2],jp(F.masu),jp(F.te),jp(F.ta),jp(F.tai),jp(F.nai),jp(F.pot)]})).replace('class="gtab"','class="gtab wide"');
+
 // ───────── 표기 해석 ─────────
 function parseMk(mk){
   const [shown,...hidden]=mk.split(';');
@@ -704,25 +911,25 @@ const SETS={
   j2:{name:'2과',sub:'おはなみは どう？',...build('j2',J2,NUMS,T2)},
   j3:{name:'3과',sub:'おちゃ どうぞ',...build('j3',J3,[],T3)}
 };
-const MODES=['card','mean','word','cloze','type','text','tquiz','wrongs','list'];
+const MODES=['card','mean','word','cloze','type','text','tquiz','gram','wrongs','list'];
 const TQ={sent:'문장 배열',next:'다음 대사',trsel:'해석 보고 고르기',dict:'듣고 받아쓰기',who:'화자 맞히기'};
 const TQ_DESC={sent:'해석을 보고 조각을 순서대로 눌러 문장 완성',next:'앞 대사를 보고 이어지는 대사 고르기',trsel:'한국어 해석을 보고 맞는 일본어 문장 고르기',dict:'문장을 듣고 손글씨로 받아쓰기 · 한자/히라가나 인정',who:'대사를 보고 누가 한 말인지 고르기'};
 const isWrite=q=>q&&(q.type==='type'||q.type==='dict');
 const sentToks=jp=>jp.replace(/([。、！？])(?=[^\s。、！？…」])/g,'$1 ').split(/\s+/).filter(Boolean);
 const dictOK=ln=>{const n=[...canon(ln.w)].length;return n>=3&&n<=14};
 const MODE_DESC_TQ='문장 배열 · 다음 대사 · 해석 보고 고르기 · 받아쓰기 · 화자 맞히기';
-const MODE_DESC={tquiz:MODE_DESC_TQ,card:'커버를 내려 뜻 확인, 좌우로 넘기기',mean:'일본어 보고 뜻 고르기',word:'뜻 보고 일본어 고르기',cloze:'본문 문장 빈칸 채우기',type:'뜻 보고 손글씨로 쓰기 · 한자/히라가나 모두 인정',text:'대화문·지문 읽기 · 해석 · 듣기',wrongs:'틀린 단어 모음 · 다시 맞히면 지워져요',list:'전체 단어와 아는 카드 표시'};
-const MODE_NAME={...TQ,tquiz:'본문 퀴즈',card:'카드',mean:'뜻 고르기',word:'단어 고르기',cloze:'본문 빈칸',type:'손글씨 쓰기',text:'본문 보기',wrongs:'오답 노트',list:'목록'};
+const MODE_DESC={gram:'학습지·교과서 문법 정리 · 문법 퀴즈 · 동사 활용 퀴즈',tquiz:MODE_DESC_TQ,card:'커버를 내려 뜻 확인, 좌우로 넘기기',mean:'일본어 보고 뜻 고르기',word:'뜻 보고 일본어 고르기',cloze:'본문 문장 빈칸 채우기',type:'뜻 보고 손글씨로 쓰기 · 한자/히라가나 모두 인정',text:'대화문·지문 읽기 · 해석 · 듣기',wrongs:'틀린 단어 모음 · 다시 맞히면 지워져요',list:'전체 단어와 아는 카드 표시'};
+const MODE_NAME={...TQ,gq:'문법 퀴즈',gram:'문법',tquiz:'본문 퀴즈',card:'카드',mean:'뜻 고르기',word:'단어 고르기',cloze:'본문 빈칸',type:'손글씨 쓰기',text:'본문 보기',wrongs:'오답 노트',list:'목록'};
 
 // ───────── 저장 ─────────
 const KEY='jp-kaiwa-vocab-v1';
-let S={known:{},wrong:{},miss:{},star:{},twrong:{},prefs:{set:'j1',theme:'system',len:10,hard:false,speak:false,auto:false,strict:3,ink:'auto',ta:false,taSec:10,confirm:true,order:'seq',trans:false}};
-try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);S.known=o.known||{};S.wrong=o.wrong||{};S.miss=o.miss||{};S.star=o.star||{};S.twrong=o.twrong||{};Object.assign(S.prefs,o.prefs||{});}}catch(e){}
+let S={known:{},wrong:{},miss:{},star:{},twrong:{},gwrong:{},prefs:{set:'j1',theme:'system',len:10,hard:false,speak:false,auto:false,strict:3,ink:'auto',ta:false,taSec:10,confirm:true,order:'seq',trans:false}};
+try{const raw=localStorage.getItem(KEY);if(raw){const o=JSON.parse(raw);S.known=o.known||{};S.wrong=o.wrong||{};S.miss=o.miss||{};S.star=o.star||{};S.twrong=o.twrong||{};S.gwrong=o.gwrong||{};Object.assign(S.prefs,o.prefs||{});}}catch(e){}
 if(!S.prefs.v2){S.prefs.auto=false;S.prefs.v2=1}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 // ───────── 상태 ─────────
-const UI={set:S.prefs.set in SETS?S.prefs.set:'j1',range:'all',unknown:false,star:false,mode:'card',review:false,tq:false,tw:false};
+const UI={set:S.prefs.set in SETS?S.prefs.set:'j1',range:'all',unknown:false,star:false,mode:'card',review:false,tq:false,tw:false,gm:false,gw:false,gsrc:'lesson'};
 let card=null;
 let Q=null;
 const $=id=>document.getElementById(id);
@@ -777,12 +984,12 @@ function renderTop(){
   $('modes').innerHTML=MODES.map(m=>`<button data-mode="${m}" class="${m==='card'?'main':''}">${MODE_NAME[m]}${m==='wrongs'?' · '+wrongItems().length+'개':''}<span>${MODE_DESC[m]}</span></button>`).join('');
 }
 function refresh(){renderTop();card=null;Q=null}
-function openPlay(m){UI.mode=m;UI.review=false;UI.tq=false;card=null;Q=null;$('play').hidden=false;document.body.style.overflow='hidden';renderStage()}
+function openPlay(m){UI.mode=m;UI.review=false;UI.tq=false;UI.gm=false;card=null;Q=null;$('play').hidden=false;document.body.style.overflow='hidden';renderStage()}
 function closePlay(){stopTimer();$('play').hidden=true;document.body.style.overflow='';try{speechSynthesis.cancel()}catch(e){}renderTop()}
 function updateBar(){
   const p=$('pinfo');if(!p)return;
   if(UI.mode==='card'&&card&&!card.done){p.innerHTML=`<span class="k">✓ ${card.known.size-(card.pending||0)} / ${card.order.length}</span>`}
-  else p.innerHTML=`<small>${esc(set().name)} · ${esc(UI.review?'오답 노트 · '+MODE_NAME[UI.mode]:UI.tq&&TQ[UI.mode]?'본문 퀴즈 · '+MODE_NAME[UI.mode]:MODE_NAME[UI.mode])}</small>`;
+  else p.innerHTML=`<small>${esc(set().name)} · ${esc(UI.review?'오답 노트 · '+MODE_NAME[UI.mode]:UI.mode==='gq'?(UI.gsrc==='verb'?'동사 활용 퀴즈':'문법 퀴즈'):UI.tq&&TQ[UI.mode]?'본문 퀴즈 · '+MODE_NAME[UI.mode]:MODE_NAME[UI.mode])}</small>`;
 }
 
 // ───────── 상세 블록 ─────────
@@ -932,17 +1139,18 @@ function startQuiz(type,items,review,limit){
 function nextQ(first){
   if(!first)Q.i++;
   if(Q.i>=Q.list.length){stopTimer();Q.done=true;renderQuiz();return}
-  Q.cur=isWrite({type:Q.type})?{type:Q.type,it:Q.list[Q.i],answered:false,hint:0,strokes:[]}:TQ[Q.type]?makeTQ(Q.type,Q.list[Q.i]):makeQ(Q.type,Q.list[Q.i]);
+  Q.cur=isWrite({type:Q.type})?{type:Q.type,it:Q.list[Q.i],answered:false,hint:0,strokes:[]}:Q.type==='gq'?makeGQ(Q.list[Q.i]):TQ[Q.type]?makeTQ(Q.type,Q.list[Q.i]):makeQ(Q.type,Q.list[Q.i]);
   startTimer(Q.cur);renderQuiz();
 }
 // 틀리면 오답 노트에 저장, 다시 맞히면 오답 노트에서 지움
-function markWrong(it){if(it.line)S.twrong[it.id]=(S.twrong[it.id]||0)+1;else{S.wrong[it.id]=(S.wrong[it.id]||0)+1;S.miss[it.id]=(S.miss[it.id]||0)+1;delete S.known[it.id]}save();if(!Q.wrongs.includes(it))Q.wrongs.push(it)}
-function markRight(it){Q.score++;const st=it.line?S.twrong:S.wrong;if(st[it.id]){delete st[it.id];Q.cleared++}save()}
+function markWrong(it){if(it.gram)S.gwrong[it.id]=(S.gwrong[it.id]||0)+1;else if(it.line)S.twrong[it.id]=(S.twrong[it.id]||0)+1;else{S.wrong[it.id]=(S.wrong[it.id]||0)+1;S.miss[it.id]=(S.miss[it.id]||0)+1;delete S.known[it.id]}save();if(!Q.wrongs.includes(it))Q.wrongs.push(it)}
+function markRight(it){Q.score++;const st=it.gram?S.gwrong:it.line?S.twrong:S.wrong;if(st[it.id]){delete st[it.id];Q.cleared++}save()}
 function promptHTML(q){
   const it=q.it;
   if(q.type==='mean')return `<div class="meta">이 단어의 뜻은?</div><div class="row"><div class="word grow" lang="ja"><span class="hl">${esc(it.w)}</span></div>${spkBtn(it.say)}</div>`;
   if(q.type==='word')return `<div class="meta">이 뜻의 일본어는?</div><div class="mean" style="font-size:22px">${esc(it.m)}</div>`;
   if(q.type==='cloze')return `<div class="meta">빈칸에 들어갈 표현은?</div><div class="ex" lang="ja" style="font-size:20px">${blankHTML(it)}</div><div class="exko">${esc(it.ex.ko)}</div>`;
+  if(q.type==='gq')return `<div class="meta">${esc(it.cat)}</div><div class="ex" lang="ja" style="font-size:20px;font-weight:700">${esc(it.prompt)}</div>${it.hint?`<div class="exko">${esc(it.hint)}</div>`:''}`;
   if(q.type==='sent')return `<div class="meta">해석을 보고 조각을 순서대로 눌러 문장을 만드세요</div><div class="mean" style="font-size:19px">${esc(it.m)}</div><div class="def" lang="ja">${esc(it.sp)}</div>`;
   if(q.type==='next')return `<div class="meta">이어지는 대사는?</div><div class="txl" style="border:0;padding:0"><span class="sp" lang="ja">${esc(it.sp)}</span><div class="ex" lang="ja" style="font-size:18px">${esc(it.w)}</div></div><div class="def">다음은 <b lang="ja">${esc(it.nx.sp)}</b>의 대사예요.</div>`;
   if(q.type==='trsel')return `<div class="meta">이 해석에 맞는 일본어 문장은?</div><div class="mean" style="font-size:19px">${esc(it.m)}</div>`;
@@ -951,7 +1159,7 @@ function promptHTML(q){
   if(q.type==='type')return `<div class="meta">뜻을 보고 일본어로 쓰세요 <span class="wtag">${it.kata?'가타카나 단어':'히라가나 또는 한자'}</span></div><div class="mean" style="font-size:22px">${esc(it.m)}</div>${it.ex?`<div class="ex" lang="ja">${blankHTML(it)}</div>`:''}`;
 }
 function optLabel(q,o){
-  if(TQ[q.type])return{jp:true,main:o.w,sub:''};
+  if(TQ[q.type]||q.type==='gq')return{jp:/[ぁ-んァ-ヶ一-龯]/.test(o.w),main:o.w,sub:''};
   const jp=q.type!=='mean';
   const main=jp?o.w:o.m;
   const sub=q.answered?(jp?o.m+(o.kj?' · '+o.kj:''):o.w):'';
@@ -960,14 +1168,14 @@ function optLabel(q,o){
 const ansText=it=>it.w+(it.kj?' · '+it.kj:'');
 function renderQuiz(){
   const st=$('stage');
-  if(Q.empty){st.innerHTML=`<div class="panel empty">${Q.review?'오답 노트가 비었어요. 틀린 단어를 모두 다시 맞혔어요!':Q.type==='cloze'?'이 범위에는 본문에 나오는 단어가 없어요. 범위를 「전체」나 「대화」로 바꿔 보세요.':TQ[Q.type]?'이 조건에 맞는 문장이 없어요. 범위나 「틀린 문장만」을 바꿔 보세요.':'이 범위에서 낼 문제가 없어요.'}</div>`;return}
+  if(Q.empty){st.innerHTML=`<div class="panel empty">${Q.review?'오답 노트가 비었어요. 틀린 단어를 모두 다시 맞혔어요!':Q.type==='cloze'?'이 범위에는 본문에 나오는 단어가 없어요. 범위를 「전체」나 「대화」로 바꿔 보세요.':Q.type==='gq'?'틀린 문법이 없어요. 「틀린 문법만」을 끄고 풀어 보세요.':TQ[Q.type]?'이 조건에 맞는 문장이 없어요. 범위나 「틀린 문장만」을 바꿔 보세요.':'이 범위에서 낼 문제가 없어요.'}</div>`;return}
   if(Q.done){
     const n=Q.list.length;
     st.innerHTML=`<div class="panel" style="display:flex;flex-direction:column;gap:12px">
-      <div class="meta">${Q.review?'오답 노트 · ':TQ[Q.type]?'본문 퀴즈 · ':''}${MODE_NAME[Q.type]} 결과</div>
+      <div class="meta">${Q.review?'오답 노트 · ':TQ[Q.type]?'본문 퀴즈 · ':Q.type==='gq'?(UI.gsrc==='verb'?'동사 활용 · ':'문법 · '):''}${MODE_NAME[Q.type]} 결과</div>
       <div class="score">${Q.score}<span style="font-size:22px;color:var(--muted)"> / ${n}</span></div>
       ${Q.cleared?`<div class="fb ok">다시 맞힌 ${Q.cleared}개를 오답 노트에서 지웠어요.</div>`:''}
-      ${Q.wrongs.length?`<div class="list">${Q.wrongs.map(it0=>{const it=Q.type==='next'&&it0.nx?it0.nx:it0;return `<div class="li"><span class="n">✗</span><div class="d"><button class="w" data-say="${esc(it.say)}" lang="ja">${esc(it.w)}${it.kj?`<small class="kj">${esc(it.kj)}</small>`:''}</button><small>${esc(it.m)}</small></div><span></span></div>`}).join('')}</div><div class="foot">${TQ[Q.type]?'틀린 문장은 본문 퀴즈의 「틀린 문장만」에서 다시 풀 수 있어요. 다시 맞히면 자동으로 지워져요.':'틀린 단어는 오답 노트에 저장됐어요. 다시 맞히면 자동으로 지워져요.'}</div>`:`<div class="fb ok">전부 맞혔어요.</div>`}
+      ${Q.wrongs.length?`<div class="list">${Q.wrongs.map(it0=>{const it=Q.type==='next'&&it0.nx?it0.nx:it0;return `<div class="li"><span class="n">✗</span><div class="d"><button class="w" data-say="${esc(it.say)}" lang="ja">${esc(it.w)}${it.kj?`<small class="kj">${esc(it.kj)}</small>`:''}</button><small>${esc(it.m)}</small></div><span></span></div>`}).join('')}</div><div class="foot">${Q.type==='gq'?'틀린 문제는 문법의 「틀린 문법만」에서 다시 풀 수 있어요. 다시 맞히면 자동으로 지워져요.':TQ[Q.type]?'틀린 문장은 본문 퀴즈의 「틀린 문장만」에서 다시 풀 수 있어요. 다시 맞히면 자동으로 지워져요.':'틀린 단어는 오답 노트에 저장됐어요. 다시 맞히면 자동으로 지워져요.'}</div>`:`<div class="fb ok">전부 맞혔어요.</div>`}
       <div class="row">${Q.wrongs.length?`<button class="btn bad grow" data-act="retryWrong">틀린 것만 다시</button>`:''}<button class="btn primary grow" data-act="again">${Q.review?'오답 노트 다시 풀기':'새로 풀기'}</button></div>
     </div>`;return;
   }
@@ -1009,7 +1217,7 @@ function renderQuiz(){
     body=`<div class="opts">${q.opts.map((o,k)=>{const L=optLabel(q,o);let cls='opt'+(L.jp?' en':'');
       if(q.answered){if(o===cor)cls+=' ok';else if(o===q.pick)cls+=' no'}else if(k===q.sel)cls+=' sel'
       return `<button class="${cls}" data-opt="${k}" ${q.answered?'disabled':''}><span class="k">${k+1}</span><span class="t" ${L.jp?'lang="ja"':''}>${esc(L.main)}${L.sub?`<span class="sub">${esc(L.sub)}</span>`:''}</span></button>`}).join('')}</div>
-      ${q.answered?`<div class="fb ${q.pick===cor?'ok':'no'}">${q.pick===cor?'정답':q.timeout?'시간 초과':'오답'}</div>${q.type==='cloze'?`<div class="ex" lang="ja">${exHTML(q.it)}</div>`:''}${TQ[q.type]?lineHTML(q.type==='next'?q.it.nx:q.it):''}<div class="row">${spkBtn(q.type==='cloze'?q.it.ex.line:TQ[q.type]?(q.type==='next'?q.it.nx.say:q.it.say):q.it.say)}<button class="btn primary grow" data-act="nextQ">다음 →</button></div>`:(S.prefs.confirm?`<div class="row"><button class="btn primary grow" data-act="confirm" ${q.sel==null?'disabled':''}>확인</button></div>`:'')}`;
+      ${q.answered?`<div class="fb ${q.pick===cor?'ok':'no'}">${q.pick===cor?'정답':q.timeout?'시간 초과':'오답'}</div>${q.type==='cloze'?`<div class="ex" lang="ja">${exHTML(q.it)}</div>`:''}${TQ[q.type]?lineHTML(q.type==='next'?q.it.nx:q.it):''}${q.type==='gq'&&q.it.ex?`<div class="panel" style="padding:12px 16px"><div class="def" lang="ja">${esc(q.it.ex)}</div></div>`:''}<div class="row">${q.type==='gq'&&!q.it.say?'':spkBtn(q.type==='cloze'?q.it.ex.line:TQ[q.type]?(q.type==='next'?q.it.nx.say:q.it.say):q.it.say)}<button class="btn primary grow" data-act="nextQ">다음 →</button></div>`:(S.prefs.confirm?`<div class="row"><button class="btn primary grow" data-act="confirm" ${q.sel==null?'disabled':''}>확인</button></div>`:'')}`;
   }
   const left=q.tl?Math.max(0,q.tl-(performance.now()-q.ts)/1000):0;
   const timerH=q.tl&&!q.answered?`<div class="tmr${left<3?' low':''}"><div class="tbar"><i id="tbar" style="width:${left/q.tl*100}%"></i></div><span id="tnum">${left.toFixed(1)}초</span></div>`:'';
@@ -1065,6 +1273,26 @@ function renderTQ(){
       <div class="txtop"><button class="chip" data-act="tw" aria-pressed="${UI.tw}">틀린 문장만 · ${tw}개</button><span class="count">범위는 첫 화면의 「대화 1·2 / 이해하기」로 고를 수 있어요</span></div>
     </div>
     <nav class="modegrid">${Object.keys(TQ).map(k=>`<button data-act="tq" data-type="${k}">${TQ[k]} · ${tqPool(k).length}문장<span>${TQ_DESC[k]}</span></button>`).join('')}</nav>`;
+}
+// ───────── 문법 ─────────
+function makeGQ(it){const q={type:'gq',it,answered:false};q.opts=shuffle(it.opts).map(w=>({w,m:''}));q.correct=q.opts.find(o=>o.w===it.w);return q}
+function gramPool(src){return (src==='verb'?GRAM.verb:GRAM[UI.set]).filter(it=>!UI.gw||S.gwrong[it.id])}
+function startGQ(src){UI.gm=true;UI.gsrc=src;UI.mode='gq';$('stage').classList.remove('cardmode');startQuiz('gq',gramPool(src),false,true);updateBar()}
+function renderGram(){
+  const lw=GRAM[UI.set].filter(i=>S.gwrong[i.id]).length,vw=GRAM.verb.filter(i=>S.gwrong[i.id]).length;
+  $('stage').innerHTML=`<div class="panel" style="display:flex;flex-direction:column;gap:10px">
+      <div class="meta">${esc(set().name)} 문법 · 학습지·교과서 기준</div>
+      <div class="txtop"><button class="chip" data-act="gw" aria-pressed="${UI.gw}">틀린 문법만 · ${lw+vw}개</button></div>
+      <div class="wn-actions" style="grid-template-columns:1fr 1fr"><button class="btn primary" data-act="gq" data-src="lesson">${esc(set().name)} 문법 퀴즈 · ${gramPool('lesson').length}</button><button class="btn" data-act="gq" data-src="verb">동사 활용 퀴즈 · ${gramPool('verb').length}</button></div>
+    </div>
+    ${GN[UI.set].map(n=>`<div class="panel gsec"><div class="meta">${esc(n.src)}</div><h3>${n.h}</h3>${n.b}</div>`).join('')}
+    <div class="panel gsec"><div class="meta">학습지 · 모든 과 공통</div><h3>동사 활용</h3>
+      ${ul(['1류: 어미가 う단으로 끝나는 동사. '+jp('かえる')+'(돌아가다)·'+jp('はいる')+'(들어가다)는 2류처럼 보여도 1류','2류: る를 떼고 활용하는 동사 ('+jp('みる、たべる、おきる')+')','3류: 불규칙 '+jp('くる、する')])}
+      <p><b>1류 규칙</b></p>${ul(['ます·たい: 어미 う단 → い단 + ます/たい','て·た: く→いて · ぐ→いで · う・つ・る→って · ぬ・ぶ・む→んで · す→して (예외 いく→いって)','ない: 어미 う단 → あ단 + ない (う로 끝나면 わ + ない)','가능형: 어미 う단 → え단 + る'])}
+      <p><b>2류 규칙</b></p>${ul(['る를 떼고 ます · て · た · たい · ない · られる(가능형)'])}
+      <p><b>3류 (불규칙)</b></p>${ul(['する → します · して · した · しない · できる','くる → きます · きて · きた · こない · こられる'])}
+      <p class="def">아래 표는 옆으로 밀어서 보세요.</p>
+      ${VTABLE}</div>`;
 }
 function pickOpt(k){
   const q=Q.cur;if(q.answered)return;
@@ -1277,6 +1505,8 @@ function renderStage(){
   else if(UI.mode==='text')renderText();
   else if(UI.mode==='wrongs')renderWrongs();
   else if(UI.mode==='tquiz')renderTQ();
+  else if(UI.mode==='gram')renderGram();
+  else if(UI.mode==='gq'){if(Q&&Q.type==='gq')renderQuiz();else startGQ(UI.gsrc)}
   else if(TQ[UI.mode]){if(Q&&Q.type===UI.mode)renderQuiz();else startTQ(UI.mode)}
   else{if(!Q||Q.type!==UI.mode)startQuiz(UI.mode,UI.review?wrongItems():undefined,UI.review);else renderQuiz()}
   updateBar();
@@ -1291,7 +1521,8 @@ document.addEventListener('click',e=>{
   if('unknown' in d&&t.classList.contains('chip')){UI.unknown=!UI.unknown;refresh();return}
   if('starf' in d){UI.star=!UI.star;refresh();return}
   if(d.mode){openPlay(d.mode);return}
-  if(d.act==='back'){if(UI.tq&&TQ[UI.mode]&&!$('play').hidden){UI.mode='tquiz';Q=null;stopTimer();renderStage();return}
+  if(d.act==='back'){if(UI.gm&&UI.mode==='gq'&&!$('play').hidden){UI.mode='gram';Q=null;stopTimer();renderStage();return}
+    if(UI.tq&&TQ[UI.mode]&&!$('play').hidden){UI.mode='tquiz';Q=null;stopTimer();renderStage();return}
     if(UI.review&&!$('play').hidden){UI.review=false;UI.mode='wrongs';Q=null;stopTimer();renderStage();return}closePlay();return}
   if(d.act==='gear'){$('gear').click();return}
   if(d.say){e.stopPropagation();say(d.say);return}
@@ -1305,6 +1536,8 @@ document.addEventListener('click',e=>{
     case 'ccStar':{const id=card.order[card.i];S.star[id]?delete S.star[id]:S.star[id]=true;save();renderCard(false);break}
     case 'ccKnown':markKnown(!card.known.has(card.order[card.i]));if(!card.known.has(card.order[card.i])&&card.open)setOpen(false);break;
     case 'tq':startTQ(d.type);break;
+    case 'gq':startGQ(d.src);break;
+    case 'gw':UI.gw=!UI.gw;renderGram();break;
     case 'tAuto':S.prefs.auto=!S.prefs.auto;save();clearTimeout(padTimer);
       if(S.prefs.auto&&Q.cur&&isWrite(Q.cur)&&!Q.cur.answered&&Q.cur.strokes&&Q.cur.strokes.length)padTimer=setTimeout(gradeInk,1600);
       renderQuiz();break;
@@ -1325,7 +1558,7 @@ document.addEventListener('click',e=>{
     case 'kb':Q.cur.input=$('typeIn')?$('typeIn').value:'';Q.cur.kb=!Q.cur.kb;renderQuiz();break;
     case 'override':overrideOk();break;
     case 'giveup':stopTimer();clearTimeout(padTimer);if(Q.cur.type==='sent')Q.cur.placed=[];Q.cur.input=$('typeIn')?$('typeIn').value:'';Q.cur.ok=false;Q.cur.answered=true;markWrong(Q.cur.it);renderQuiz();say(Q.cur.it.say);break;
-    case 'again':if(TQ[Q.type]){startTQ(Q.type);break}startQuiz(Q.type,Q.review?wrongItems():undefined,Q.review);break;
+    case 'again':if(Q.type==='gq'){startGQ(UI.gsrc);break}if(TQ[Q.type]){startTQ(Q.type);break}startQuiz(Q.type,Q.review?wrongItems():undefined,Q.review);break;
     case 'retryWrong':startQuiz(Q.type,Q.wrongs.slice(),Q.review);updateBar();break;
   }
 });
@@ -1363,7 +1596,7 @@ let resetArmed=false;
 $('resetBtn').addEventListener('click',()=>{
   const msg=$('resetMsg');
   if(!resetArmed){resetArmed=true;msg.hidden=false;msg.textContent=set().name+' 기록을 지우려면 한 번 더 누르세요.';return}
-  set().items.forEach(it=>{delete S.known[it.id];delete S.wrong[it.id];delete S.miss[it.id];delete S.star[it.id]});set().lines.forEach(l=>[l,...l.parts].forEach(x=>delete S.twrong[x.id]));save();resetArmed=false;msg.textContent=set().name+' 기록을 지웠어요.';refresh();
+  set().items.forEach(it=>{delete S.known[it.id];delete S.wrong[it.id];delete S.miss[it.id];delete S.star[it.id]});set().lines.forEach(l=>[l,...l.parts].forEach(x=>delete S.twrong[x.id]));GRAM[UI.set].forEach(x=>delete S.gwrong[x.id]);save();resetArmed=false;msg.textContent=set().name+' 기록을 지웠어요.';refresh();
 });
 $('gear').addEventListener('click',()=>{resetArmed=false;$('resetMsg').hidden=true;renderSettings();$('settings').hidden=false});
 $('closeSet').addEventListener('click',()=>{$('settings').hidden=true});
